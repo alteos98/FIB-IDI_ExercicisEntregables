@@ -1,12 +1,9 @@
 #version 330 core
 
-in vec3 fcolor;
-
 out vec4 FragColor;
 
 in vec4 vertexFS;
 in vec3 normalFS;
-in vec3 LFS;
 
 in vec3 matambFS;
 in vec3 matdiffFS;
@@ -15,6 +12,7 @@ in float matshinFS;
 
 vec3 colFocus = vec3(0.8, 0.8, 0.8);
 vec3 llumAmbient = vec3(0.2, 0.2, 0.2);
+vec3 posFocus = vec3(1, 1, 1);  // en SCA
 
 vec3 Lambert (vec3 NormSCO, vec3 L) 
 {
@@ -53,6 +51,7 @@ vec3 Phong (vec3 NormSCO, vec3 L, vec4 vertSCO)
 
 void main()
 {	
+	vec3 LFS = posFocus.xyz - vertexFS.xyz;
 	vec3 fcolorFS = Phong(normalize(normalFS), normalize(LFS), vertexFS);
 	FragColor = vec4(fcolorFS,1);	
 }

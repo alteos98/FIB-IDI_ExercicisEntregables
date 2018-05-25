@@ -5,7 +5,6 @@ in vec3 normal;
 
 out vec4 vertexFS;
 out vec3 normalFS;
-out vec3 LFS;
 
 in vec3 matamb;
 in vec3 matdiff;
@@ -26,21 +25,16 @@ vec3 colFocus = vec3(0.8, 0.8, 0.8);
 vec3 llumAmbient = vec3(0.2, 0.2, 0.2);
 vec3 posFocus = vec3(1, 1, 1);  // en SCA
 
-out vec3 fcolor;
-
 void main()
 {	
   vec4 vSCO = view * TG * vec4(vertex, 1);
-  vec3 L = posFocus.xyz - vSCO.xyz;
   mat3 NormalMatrix = inverse(transpose(mat3(view*TG)));
   vec3 n = NormalMatrix * normal;
 
-  //fcolor = matdiff;
   gl_Position = proj * view * TG * vec4 (vertex, 1.0);
 
   vertexFS = vSCO;
   normalFS = n;
-  LFS = L;
   
   matambFS = matamb;
   matdiffFS = matdiff;

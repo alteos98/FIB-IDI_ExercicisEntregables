@@ -46,6 +46,7 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     void modelTransformModel1 ();
     void modelTransformModel2 ();
     void calculaCapsaModel ();
+    void calculaCapsaEscena();
 
     // VAO names
     GLuint VAO_Patr;
@@ -62,8 +63,9 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     // paràmetres calculats a partir de la capsa contenidora del model
     glm::vec3 centreBasePatr;
     float escala;
-    // radi de l'escena
-    float radiEsc;
+    // escena
+    float radiEsc, radiEsfera;
+    glm::vec3 centreCapsa;
 
     typedef  enum {NONE, ROTATE} InteractiveAction;
     InteractiveAction DoingInteractive;
@@ -71,6 +73,6 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     float angleX, angleY;
     bool perspectiva;
 
-    float FOV, ra;
+    float FOV, FOVini, ra, zNear, zFar;
 };
 
