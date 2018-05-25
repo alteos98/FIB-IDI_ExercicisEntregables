@@ -32,7 +32,8 @@ void MyGLWidget::initializeGL ()
 
 void MyGLWidget::iniEscena ()
 {
-  radiEsc = sqrt(3);  // sqrt(1+1+1)
+  //radiEsc = sqrt(3);  // sqrt(1+1+1)
+  calculaCapsaEscena();
 }
 
 void MyGLWidget::iniCamera ()
@@ -41,8 +42,10 @@ void MyGLWidget::iniCamera ()
   angleY = M_PI / 4;
   perspectiva = true;
 
-  FOV = float(M_PI/3.0);
+  FOVini = FOV = 2 * asin(radiEsfera/radiEsc);
   ra = 1.0;
+  zNear = radiEsc - radiEsfera;
+  zFar = radiEsc + radiEsfera;
 
   projectTransform ();
   viewTransform ();
@@ -79,11 +82,14 @@ void MyGLWidget::paintGL ()
 
 void MyGLWidget::resizeGL (int w, int h) 
 {
-  glViewport(0, 0, w, h);
   float raV = float (w) / float (h);
   ra = raV;
-  if(raV < 1.0) FOV = 2.0*atan(tan((float)M_PI/4)/raV);
+  if (raV < 1) {
+    FOV = 2*atan(tan(FOVini/2)/raV);
+  }
+  else FOV = FOVini;
   projectTransform();
+  glViewport(0, 0, w, h);
 }
 
 void MyGLWidget::createBuffersModel ()
@@ -178,7 +184,7 @@ void MyGLWidget::createBuffersTerraIParet ()
   // Definim el material del terra
   glm::vec3 amb(0.2,0,0.2);
   glm::vec3 diff(0.2,0.2,0.6);
-  glm::vec3 spec(0,0,0);
+  glm::vec3 spec(1,1,1);
   float shin = 100;
 
   // Fem que aquest material afecti a tots els vèrtexs per igual
@@ -322,9 +328,9 @@ void MyGLWidget::projectTransform ()
 {
   glm::mat4 Proj;  // Matriu de projecció
   if (perspectiva)
-    Proj = glm::perspective(FOV, ra, radiEsc, 3.0f*radiEsc);
+    Proj = glm::perspective(FOV, ra, zNear, zFar);
   else
-    Proj = glm::ortho(-radiEsc, radiEsc, -radiEsc, radiEsc, radiEsc, 3.0f*radiEsc);
+    Proj = glm::ortho(-radiEsfera, radiEsfera, -radiEsfera, radiEsfera, zNear, zFar);
 
   glUniformMatrix4fv (projLoc, 1, GL_FALSE, &Proj[0][0]);
 }
@@ -332,9 +338,10 @@ void MyGLWidget::projectTransform ()
 void MyGLWidget::viewTransform ()
 {
   glm::mat4 View;  // Matriu de posició i orientació
-  View = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, -2*radiEsc));
-  View = glm::rotate(View, -angleX, glm::vec3(1, 0, 0));
-  View = glm::rotate(View, -angleY, glm::vec3(0, 1, 0));
+  View = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, -radiEsc));
+  View = glm::rotate(View, -angleX, glm::vec3(1, 0, 0)); //rotacio X
+  View = glm::rotate(View, -angleY, glm::vec3(0, 1, 0)); //rotacio Y
+  View = glm::translate(View, -centreCapsa); //VRP = centreCapsa
 
   glUniformMatrix4fv (viewLoc, 1, GL_FALSE, &View[0][0]);
 }
@@ -363,6 +370,14 @@ void MyGLWidget::calculaCapsaModel ()
   }
   escala = 2.0/(maxy-miny);
   centreBasePatr[0] = (minx+maxx)/2.0; centreBasePatr[1] = miny; centreBasePatr[2] = (minz+maxz)/2.0;
+}
+
+void MyGLWidget::calculaCapsaEscena() {
+	glm::vec3 Pmin = glm::vec3(-1, 0, -1);
+	glm::vec3 Pmax = glm::vec3(1, 2, 1);
+	centreCapsa = glm::vec3((Pmin.x + Pmax.x)/2, (Pmin.y + Pmax.y)/2, (Pmin.z + Pmax.z)/2);
+	radiEsfera = sqrt((Pmax.x - Pmin.x)*(Pmax.x - Pmin.x) + (Pmax.y - Pmin.y)*(Pmax.y - Pmin.y) + (Pmax.z - Pmin.z)*(Pmax.z - Pmin.z)) / 2;
+	radiEsc = radiEsfera * 2;
 }
 
 void MyGLWidget::keyPressEvent(QKeyEvent* event) 
